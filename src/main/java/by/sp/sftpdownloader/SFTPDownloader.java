@@ -1,5 +1,8 @@
 package by.sp.sftpdownloader;
 
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
+
 import java.io.*;
 import java.util.HashMap;
 
@@ -19,7 +22,7 @@ public class SFTPDownloader {
     private void startUp(String pathToFile) {
         File fileWithSettings = new File(pathToFile);
         readFile(fileWithSettings);
-        readMap();
+        sftpFilesCopy();
     }
 
     private void readFile(File fileWithSettings) {
@@ -40,16 +43,22 @@ public class SFTPDownloader {
         settingsMap.put(result[0], result[1]);
     }
 
-    private void readMap() {
-        System.out.println(settingsMap);
-        System.out.println("sftp_host: " + settingsMap.get("sftp_host"));
-        System.out.println("sftp_port: " + settingsMap.get("sftp_port"));
-        System.out.println("sftp_user: " + settingsMap.get("sftp_user"));
-        System.out.println("sftp_password: " + settingsMap.get("sftp_password"));
-        System.out.println("sftp_remote_dir: " + settingsMap.get("sftp_remote_dir"));
-        System.out.println("local_dir: " + settingsMap.get("local_dir"));
-        System.out.println("sql_user: " + settingsMap.get("sql_user"));
-        System.out.println("sql_password: " + settingsMap.get("sql_password"));
-        System.out.println("sql_database: " + settingsMap.get("sql_database"));
+    private void sftpFilesCopy() {
+        JschClient sftpClient = new JschClient(
+                settingsMap.get("sftp_host"),
+                Integer.parseInt(settingsMap.get("sftp_port")),
+                settingsMap.get("sftp_user"),
+                settingsMap.get("sftp_password"),
+                settingsMap.get("sftp_remote_dir"),
+                settingsMap.get("local_dir")
+        );
+        try {
+            sftpClient.downloadFilesFromRemoteDir();
+        } catch (JSchException | SftpException | SecurityException e) {
+            e.printStackTrace();
+        }
+//        System.out.println("sql_user: " + settingsMap.get("sql_user"));
+//        System.out.println("sql_password: " + settingsMap.get("sql_password"));
+//        System.out.println("sql_database: " + settingsMap.get("sql_database"));
     }
 }
