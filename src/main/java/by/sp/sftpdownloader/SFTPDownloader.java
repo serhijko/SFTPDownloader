@@ -4,6 +4,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 
 import java.io.*;
+import java.sql.SQLException;
 import java.util.HashMap;
 
 public class SFTPDownloader {
@@ -50,15 +51,15 @@ public class SFTPDownloader {
                 settingsMap.get("sftp_user"),
                 settingsMap.get("sftp_password"),
                 settingsMap.get("sftp_remote_dir"),
-                settingsMap.get("local_dir")
+                settingsMap.get("local_dir"),
+                settingsMap.get("sql_user"),
+                settingsMap.get("sql_password"),
+                settingsMap.get("sql_database")
         );
         try {
             sftpClient.downloadFilesFromRemoteDir();
-        } catch (JSchException | SftpException | SecurityException e) {
+        } catch (JSchException | SftpException | SecurityException | SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-//        System.out.println("sql_user: " + settingsMap.get("sql_user"));
-//        System.out.println("sql_password: " + settingsMap.get("sql_password"));
-//        System.out.println("sql_database: " + settingsMap.get("sql_database"));
     }
 }

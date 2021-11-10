@@ -2,7 +2,8 @@ package by.sp.sftpdownloader;
 
 import com.jcraft.jsch.*;
 
-import java.io.File;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Vector;
 
 public class JschClient {
@@ -13,11 +14,14 @@ public class JschClient {
     private final String password;
     private final String remoteDirName;
     private final String localDirName;
+    private final String sql_user;
+    private final String sql_password;
+    private final String sql_database;
 
     Session jschSession = null;
 
-    public JschClient(String sftp_host, int sftp_port, String sftp_user, String sftp_password,
-                      String sftp_remote_dir, String local_dir) {
+    public JschClient(String sftp_host, int sftp_port, String sftp_user, String sftp_password, String sftp_remote_dir,
+                      String local_dir, String sql_user, String sql_password, String sql_database) {
         remoteHost = sftp_host;
         port = sftp_port;
         username = sftp_user;
@@ -28,6 +32,9 @@ public class JschClient {
         } else {
             localDirName = local_dir;
         }
+        this.sql_user = sql_user;
+        this.sql_password = sql_password;
+        this.sql_database = sql_database;
     }
 
     private ChannelSftp setupJsch() throws JSchException {
@@ -39,29 +46,26 @@ public class JschClient {
         return (ChannelSftp) jschSession.openChannel("sftp");
     }
 
-    public void downloadFilesFromRemoteDir() throws JSchException, SftpException, SecurityException {
+    public void downloadFilesFromRemoteDir() throws JSchException, SftpException, SecurityException, SQLException,
+            ClassNotFoundException {
         ChannelSftp channelSftp = setupJsch();
         channelSftp.connect();
 
         channelSftp.cd(remoteDirName);
         // Creates a Vector for objects of files and directories
         Vector<ChannelSftp.LsEntry> fileList = channelSftp.ls(remoteDirName);
-        File localDir = new File(localDirName);
-        if (!localDir.exists()) {
-            System.out.println("The directory “" + localDirName + "” does not exist.");
-            if (localDir.mkdirs()) {
-                System.out.println("The directory “" + localDirName + "” is created successfully.");
-            } else {
-                System.out.println("The directory “" + localDirName + "” cannot be created.");
-                throw new SecurityException();
-            }
-        }
+        DirectoriesCreator.createDir(localDirName);
+        SQLiteMediator sqLiteMediator = new SQLiteMediator(sql_user, sql_password, sql_database);
+        sqLiteMediator.connectDB();
+        sqLiteMediator.createTable();
         int filesCopiedCount = 0;
         for (ChannelSftp.LsEntry f : fileList) {
             if (!f.getAttrs().isDir()) {
                 String fileName = f.getFilename();
                 channelSftp.get(fileName, localDirName + fileName);
-                System.out.println(fileName);
+                System.out.print(fileName);
+                System.out.println(LocalDateTime.now());
+                sqLiteMediator.insert(fileName, LocalDateTime.now());
                 ++filesCopiedCount;
             }
         }
@@ -75,5 +79,9 @@ public class JschClient {
         channelSftp.exit();
         jschSession.disconnect();
         System.out.println("\nThe session is disconnected.");
+
+        sqLiteMediator.readDB();
+        sqLiteMediator.deleteTable();
+        sqLiteMediator.closeDB();
     }
 }
