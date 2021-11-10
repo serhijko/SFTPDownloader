@@ -29,9 +29,14 @@ public class SQLiteMediator {
         connection = DriverManager.getConnection("jdbc:sqlite:" + DB_DIR + DB_NAME);
     }
 
+    public void deleteTable() throws SQLException {
+        statement = connection.createStatement();
+        statement.execute("DROP TABLE IF EXISTS files");
+    }
+
     public void createTable() throws SQLException {
         statement = connection.createStatement();
-        statement.execute("CREATE TABLE IF NOT EXISTS 'files' (" +
+        statement.execute("CREATE TABLE files (" +
                 "'id' INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "'filename' VARCHAR(255) NOT NULL," +
                 "'datetime' datetime NOT NULL);");
@@ -54,11 +59,6 @@ public class SQLiteMediator {
             String datetime = resultSet.getString("datetime");
             System.out.println(id + ": " + filename + "\t(" + datetime + ")");
         }
-    }
-
-    public void deleteTable() throws SQLException {
-        statement = connection.createStatement();
-        statement.execute("DROP TABLE IF EXISTS 'files'");
     }
 
     public void closeDB() throws SQLException {

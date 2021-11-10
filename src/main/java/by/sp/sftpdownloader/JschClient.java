@@ -57,14 +57,13 @@ public class JschClient {
         DirectoriesCreator.createDir(localDirName);
         SQLiteMediator sqLiteMediator = new SQLiteMediator(sql_user, sql_password, sql_database);
         sqLiteMediator.connectDB();
+        sqLiteMediator.deleteTable();
         sqLiteMediator.createTable();
         int filesCopiedCount = 0;
         for (ChannelSftp.LsEntry f : fileList) {
             if (!f.getAttrs().isDir()) {
                 String fileName = f.getFilename();
                 channelSftp.get(fileName, localDirName + fileName);
-                System.out.print(fileName);
-                System.out.println(LocalDateTime.now());
                 sqLiteMediator.insert(fileName, LocalDateTime.now());
                 ++filesCopiedCount;
             }
@@ -81,7 +80,6 @@ public class JschClient {
         System.out.println("\nThe session is disconnected.");
 
         sqLiteMediator.readDB();
-        sqLiteMediator.deleteTable();
         sqLiteMediator.closeDB();
     }
 }
