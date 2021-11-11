@@ -1,7 +1,5 @@
 package by.sp.sftpdownloader;
 
-import org.sqlite.core.DB;
-
 import java.sql.*;
 import java.time.LocalDateTime;
 
@@ -10,7 +8,6 @@ public class SQLiteMediator {
     private final String sql_user;
     private final String sql_password;
     private final String DB_NAME;
-    private final String DB_DIR = "~/db/";
 
     private Connection connection;
     private Statement statement;
@@ -25,8 +22,10 @@ public class SQLiteMediator {
     public void connectDB() throws ClassNotFoundException, SQLException {
         connection = null;
         Class.forName("org.sqlite.JDBC");
+
+        String DB_DIR = "~/db/";
         DirectoriesCreator.createDir(DB_DIR);
-        connection = DriverManager.getConnection("jdbc:sqlite:" + DB_DIR + DB_NAME);
+        connection = DriverManager.getConnection("jdbc:sqlite:" + DB_DIR + DB_NAME, sql_user, sql_password);
     }
 
     public void deleteTable() throws SQLException {
