@@ -61,8 +61,8 @@ public class SQLiteMediator {
     }
 
     public void closeDB() throws SQLException {
-        connection.close();
-        statement.close();
         resultSet.close();
+        statement.close();
+        connection.close();
     }
 }
