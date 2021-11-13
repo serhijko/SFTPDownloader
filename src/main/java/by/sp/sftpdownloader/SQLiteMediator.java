@@ -1,7 +1,9 @@
 package by.sp.sftpdownloader;
 
+import java.io.File;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.Properties;
 
 public class SQLiteMediator {
 
@@ -24,8 +26,21 @@ public class SQLiteMediator {
         Class.forName("org.sqlite.JDBC");
 
         String DB_DIR = "~/db/";
-        DirectoriesCreator.createDir(DB_DIR);
+        File dbFile = new File(DB_DIR + DB_NAME);
+        boolean firstExecution = false;
+        if (!dbFile.exists()) {
+            DirectoriesCreator.createDir(DB_DIR);
+            firstExecution = true;
+        }
         connection = DriverManager.getConnection("jdbc:sqlite:" + DB_DIR + DB_NAME, sql_user, sql_password);
+        if (firstExecution) {
+            System.out.println("A database is created. The first execution of the database:");
+            Properties properties = new Properties();
+            properties.put("user_name", "user_name");
+            properties.put("password", "password");
+            connection.setClientInfo(properties);
+            System.out.println("user_name and password are set.");
+        }
     }
 
     public void deleteTable() throws SQLException {

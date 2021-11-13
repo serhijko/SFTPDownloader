@@ -50,6 +50,7 @@ public class JschClient {
             ClassNotFoundException {
         ChannelSftp channelSftp = setupJsch();
         channelSftp.connect();
+        System.out.println("A session is connected.");
 
         channelSftp.cd(remoteDirName);
         // Creates a Vector for objects of files and directories
